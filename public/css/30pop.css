@@ -1,0 +1,107 @@
+@import url(http://fonts.googleapis.com/css?family=Lato:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,700,300,600,800,400);
+@import url(http://fonts.googleapis.com/css?family=Bevan);
+
+body, html{
+	font-family: 'Lato', sans-serif;
+	text-rendering: optimizeLegibility !important;
+	-webkit-font-smoothing: antialiased !important;
+	color: #5a5a5a;
+}
+a.navbar-brand {
+    font-family: 'Bevan', cursive;
+    font-weight: 900;
+}
+
+p{
+	font-family: 'Open Sans', sans-serif;
+}
+
+.postTitle, .postName, .comment-title, .comment-name {
+    word-wrap: break-word;
+}
+
+.post-image {
+    max-height: 200px;
+}
+
+.dead-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.comments {
+    background-color: #f5f5f5;
+    border: 1px solid #e3e3e3;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+}
+.comment {
+    background-color: #f5f5f5;
+    border: 1px solid #e3e3e3;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+}
+
+.box {
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.lava:before {    
+    content: url("../res/jagex-crown.png");
+    padding-right: 5px;
+}
+.lava {
+    color: red;
+}
+
+.bomb:before {
+    content: url("../res/bomb.png");
+    padding-right: 5px;
+}
+
+.green-mush:before {
+    content: url("../res/greenmush.png");
+    padding-right: 5px;
+}
+
+.red-mush:before {
+    content: url("../res/redmush.png");
+    padding-right: 5px;
+}
+
+.question-block:before {
+    content: url("../res/block.gif");
+    padding-right: 5px;
+}
+
+.batman:before {
+    content: url("../res/batman.png");
+    padding-right: 5px;
+}
+
+.purple {
+    border: solid 10px #e3e;
+}
+
+.orange {
+    border: solid 10px orange;
+}
+
+.aqua {
+    border: solid 10px aqua;
+}
+
+.red {
+    border: solid 10px red;
+}
+
+.grey {
+    border: solid 5px grey;
+}

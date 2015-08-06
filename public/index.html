@@ -1,0 +1,229 @@
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta charset="utf-8">
+        <title>30pop5me</title>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+        <link href="css/30pop.css" rel="stylesheet">
+    </head>
+
+    <body>
+        <div class="navbar navbar-static navbar-inverse" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">30Pop 3000</a>
+                </div>          
+            </div>            
+        </div>
+        
+        
+        <div class="container">
+            <div class="row">
+                <div class="hidden-xs hidden-sm col-md-2 col-lg-1"></div>
+                <div class="col-xs-12 col-sm-12 col-md-8 col-lg-10">
+                    <button type="button" id="post-button" class="btn btn-primary btn-block">Push a Post || Pop a Post</button>
+                    <div id="input-form" class="well" style="display:none;">
+                        <form class="form-horizontal">
+                            <div class="form-group title-group">
+                                <label class="col-sm-2 control-label">Title</label>
+                                <div class="col-sm-10">
+                                  <input class="form-control" id="mainInputTitle" placeholder="Title of your submission">
+                                </div>
+                            </div>
+
+                            <div class="form-group name-group">
+                                <label class="col-sm-2 control-label">Name</label>
+                                <div class="col-sm-10">
+                                    <input class="form-control" id="mainInputName" placeholder="What is your name?">                            
+                                </div>
+                            </div>
+                            
+                            <div class="form-group link-group">
+                                <label class="col-sm-2 control-label">Img Link</label>
+                                <div class="col-sm-10">
+                                    <input class="form-control" id="mainInputLink" placeholder="Physical link to raw image">                            
+                                </div>
+                            </div>
+                            
+                            <div class="form-group link-group">
+                                <label class="col-sm-2 control-label">Secret Code</label>
+                                <div class="col-sm-10">
+                                    <input class="form-control" id="mainInputCode" placeholder="(Optional) Only 90s kids will get this">                            
+                                </div>
+                            </div>
+                            
+                            <div class="btn-group" role="group" aria-label="...">
+                              <button type="button" id="mainPushButton" class="btn btn-primary">Push</button>
+                              <button type="button" id="mainPopButton" class="btn btn-primary">Pop</button>
+                            </div>
+                            
+                        </form>
+                    </div>
+
+                    <div id="feed">
+
+                    </div>
+                </div>
+                <div class="hidden-xs hidden-sm col-md-2 col-lg-1"></div>
+            </div>
+        </div>
+        <script src="http://code.jquery.com/jquery-2.1.4.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="http://underscorejs.org/underscore-min.js"></script>
+        <script src="js/posttemplate.js"></script>
+        <script src="js/socket.io.js"></script>
+        <!--
+            Use this if you want to access the website on your OpenShift url,
+            else you can host the website (in public folder) on another domain name 
+        <script src="/socket.io/socket.io.js"></script>
+
+        --> 
+        <script>
+            (function() {
+                
+                $("#post-button").click(function() {
+                   $("#input-form").toggle('slow', function() {
+                       
+                   });
+                });
+                
+
+                try {
+                    var socket = io.connect("localhost:8082");
+                    //var socket = io.connect("http://app-namespace.rhcloud.com:8000");
+                } catch(e) {
+                    // Set status to warn user
+                }
+                
+                if(socket !== undefined) {
+                    socket.on('invalid-bureaucrat', function() {
+                        alert("You can not pop a bureaucrat's post");
+                        alert("hahaha");
+                    });
+                    
+                    socket.on('invalid', function() {
+                        alert("You must fill in all blanks");
+                    });
+                    
+                    
+                    // Listen for posts being added to feed and create HTML to prepend to feed
+                    socket.on('output', function(data) {
+                        console.log("We have a new entry2");
+                        console.log(data); // Contains the string of the HTML to be prepended
+                        
+                        if (data.length) {
+                            for (var x = data.length - 1; x >= 0; x = x - 1) {
+                                // Loop through results                                
+                                var output = compiledPost(data[x]);
+                                var $output = $(output);
+                                
+                                // Append comments to each post if it has any
+                                if (data[x].comments !== undefined && data[x].comments.length !== 0) {
+                                    
+                                    for (var i = 0; i < data[x].comments.length; i++) {
+                                        var outputComment = compiledComment(data[x].comments[i]);
+                                        $output.find(".comments-header").after(outputComment);
+                                    }
+                                }
+                                
+                                // Effects for sliding down, had to be invisible first, then appears
+                                $output.hide().prependTo($("#feed")).show('slow');
+                            }
+                        }
+                    });
+                    
+                    socket.on('mainPopOff', function() {
+                        console.log('Popped off main feed!');
+                        $(".post:first").slideUp('slow', function() {
+                            $(this).remove();
+                        });
+                    });
+                    
+                    socket.on('pushOn', function(data) {
+                        console.log('Push comment a post');
+                        console.log(data);
+                        
+                        var outputComment = compiledComment(data);
+                        console.log(outputComment);
+                        
+                        var $commentsHeader = $(".post").filter(function() {
+                            return $(this).find(".postId").text() === data.details.postId;
+                        }).find(".comments-header");
+                        
+                        $(outputComment).hide().insertAfter($commentsHeader).show('slow');
+                    });
+                    
+                    // Gets details of the post that will have one of the comments popped off
+                    socket.on('popOff', function(id1) {
+                       console.log('Popped off post!');
+                        $(".post").filter(function() {
+                            return $(this).find(".postId").text() === id1;
+                        }).find(".comment:first").slideUp('slow', function() {
+                            $(this).remove();
+                        });
+                        
+                    });
+                    
+                    // Listen for hitting push button, we gon send
+                    $("#mainPushButton").click(function() {
+                        event.preventDefault();
+                        var title = $("#mainInputTitle").val(),
+                            name = $("#mainInputName").val(),
+                            link = $("#mainInputLink").val(),
+                            code = $("#mainInputCode").val();
+                            
+                        
+                        socket.emit('mainPush', {
+                            title: title,
+                            name: name,
+                            link: link,
+                            code: code
+                        });
+                        console.log('Main Push!');
+                    });
+                    
+                    // Listen for hitting pop button, we gon send 
+                    $("#mainPopButton").click(function() {
+                        event.preventDefault();
+                        
+                        socket.emit('mainPop');
+                        console.log('Main Pop!');
+                    });
+                    
+                    // Listen for commenting push
+                    
+                    $("#feed").on("click", ".push-button", function(e) {
+                        event.preventDefault();
+                        
+                        var postId = $(this).parents(".well").siblings(".well").find(".postId").text();
+                        var title = $(this).parent().siblings(".form-group").find(".input-title").val();
+                        var name = $(this).parent().siblings(".form-group").find(".input-name").val();
+                        var link = $(this).parent().siblings(".form-group").find(".input-link").val();
+                        var code = $(this).parent().siblings(".form-group").find(".input-code").val();
+                        
+                        socket.emit('push', {
+                            postId: postId,
+                            title: title,
+                            name: name,
+                            link: link,
+                            code: code
+                        });
+                    });
+                    
+                    // Listen for commenting push
+                    
+                    $("#feed").on("click", ".pop-button", function(e) {
+                        event.preventDefault();
+                        var id = $(this).parents(".well").siblings(".well").find(".postId").text();
+                        
+                        socket.emit('pop', id);                        
+                        console.log('Comment Pop!');
+                        
+                    });
+                }
+            })();
+                
+        </script>
+    </body>
+</html>
